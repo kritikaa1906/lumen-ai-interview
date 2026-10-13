@@ -1,0 +1,6 @@
+{
+  "name": "Lumen AI Interview",
+  "description": "The Interview Intelligence Studio: AI-powered mock interviews, resume skills extraction, structured evaluation rubrics, and real analytics.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

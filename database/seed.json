@@ -1,0 +1,317 @@
+[
+  {
+    "role": "Frontend Developer",
+    "difficulty": "medium",
+    "category": "technical",
+    "questions": [
+      {
+        "id": "fe-01",
+        "questionText": "Explain the difference between useMemo, useCallback, and React.memo. When would you avoid overusing them?",
+        "topicTag": "React Performance",
+        "difficulty": "medium",
+        "expectedConcepts": [
+          "useMemo caches computed values",
+          "useCallback caches function instances between renders",
+          "React.memo is a higher-order component for shallow prop comparison",
+          "Overhead of memoization: dependency array comparison and memory closures",
+          "Premature optimization anti-pattern"
+        ],
+        "exampleAnswer": "React.memo prevents a functional component from re-rendering unless its props change via shallow equality. useMemo caches the result of an expensive calculation between renders, while useCallback caches a function definition so child components relying on reference stability don't needlessly re-render. You should avoid overusing them for trivial operations, because comparing dependency arrays and retaining closures carries its own memory and CPU cost that can outweigh re-rendering cost."
+      },
+      {
+        "id": "fe-02",
+        "questionText": "How does the browser event loop handle microtasks versus macrotasks, and how does this affect UI rendering updates?",
+        "topicTag": "Browser Architecture",
+        "difficulty": "medium",
+        "expectedConcepts": [
+          "Call stack execution",
+          "Microtask queue: Promises, queueMicrotask, MutationObserver",
+          "Macrotask queue: setTimeout, setInterval, setImmediate, I/O",
+          "Microtask queue drained completely before next macrotask or render phase",
+          "Animation frame callbacks (requestAnimationFrame) before paint"
+        ],
+        "exampleAnswer": "When the synchronous call stack empties, the JavaScript runtime drains the entire microtask queue (Promises, queueMicrotask) before picking the next macrotask (setTimeout, I/O). The browser render pipeline runs between macrotask cycles after microtasks are drained. If microtasks continuously queue other microtasks, they starve the render step and freeze the browser UI."
+      },
+      {
+        "id": "fe-03",
+        "questionText": "What strategies do you use to optimize Core Web Vitals, specifically LCP (Largest Contentful Paint) and INP (Interaction to Next Paint)?",
+        "topicTag": "Web Vitals & Performance",
+        "difficulty": "hard",
+        "expectedConcepts": [
+          "LCP optimization: image preloading, CDN caching, reducing render-blocking CSS/JS, modern formats (WebP/AVIF)",
+          "INP optimization: breaking long tasks, yield to main thread (scheduler.yield), debouncing expensive handlers",
+          "Server-side rendering or streaming HTML",
+          "Hydration cost minimization"
+        ],
+        "exampleAnswer": "For LCP, prioritize critical resource discovery using <link rel='preload'>, fetchpriority='high' on hero images, serve modern formats like AVIF via CDN, and minimize render-blocking stylesheets. For INP, eliminate long JavaScript tasks (>50ms) by yielding to the main thread with scheduler.yield() or setTimeout, offloading heavy computations to Web Workers, and decoupling visual click feedback from background data processing."
+      }
+    ]
+  },
+  {
+    "role": "Backend Developer",
+    "difficulty": "medium",
+    "category": "technical",
+    "questions": [
+      {
+        "id": "be-01",
+        "questionText": "How would you design a distributed idempotency key mechanism for payment processing APIs?",
+        "topicTag": "API Design & Concurrency",
+        "difficulty": "hard",
+        "expectedConcepts": [
+          "Client-generated idempotency key passed in headers",
+          "Distributed lock (Redis/Key-value store) or database unique constraint",
+          "Request status tracking: IN_PROGRESS, COMPLETED, FAILED",
+          "Atomic response caching to return identical result on replay",
+          "TTL/expiry on idempotency records"
+        ],
+        "exampleAnswer": "Clients send an Idempotency-Key header with mutations. The server attempts an atomic lock (e.g., Redis SETNX or SQL unique constraint on idempotency_key). If the key exists with status COMPLETED, return the cached HTTP response and transaction ID immediately without re-executing. If IN_PROGRESS, return 409 Conflict. If new, process the payment inside a transactional boundary, persist the final state and response payload, and assign an appropriate TTL like 24 hours."
+      },
+      {
+        "id": "be-02",
+        "questionText": "Compare horizontal scaling stateful versus stateless microservices. How do you handle session state and connection pools?",
+        "topicTag": "System Architecture",
+        "difficulty": "medium",
+        "expectedConcepts": [
+          "Stateless services allow arbitrary load balancing round-robin",
+          "Shared session stores (Redis) vs JWT stateless signatures",
+          "Connection pooling limits per instance to prevent database connection exhaustion",
+          "Database connection pool proxying (PgBouncer / AWS RDS Proxy)",
+          "Graceful shutdown handling"
+        ],
+        "exampleAnswer": "Stateless microservices can scale horizontally behind any load balancer because requests carry self-contained credentials (JWT) or read shared fast stores like Redis. Stateful architectures (e.g., WebSockets) require sticky routing or pub/sub brokers. Horizontally scaling stateless instances also multiplies database connections, requiring database connection pool proxies like RDS Proxy or PgBouncer to prevent exhausting connection limits."
+      },
+      {
+        "id": "be-03",
+        "questionText": "Explain the difference between optimistic and pessimistic locking in relational databases. When is each preferred?",
+        "topicTag": "Database Concurrency",
+        "difficulty": "medium",
+        "expectedConcepts": [
+          "Pessimistic locking (SELECT FOR UPDATE) acquires exclusive row locks early",
+          "Optimistic locking uses version column or timestamp without row lock during read",
+          "Optimistic rollback/retry on version mismatch during commit",
+          "Pessimistic preferred for high-contention, low-latency financial balances",
+          "Optimistic preferred for read-heavy, low-conflict workflows"
+        ],
+        "exampleAnswer": "Pessimistic locking locks the records at read time using SELECT ... FOR UPDATE, preventing concurrent reads/writes until the transaction commits; this is ideal in high-contention scenarios like high-volume inventory deductions. Optimistic locking avoids row locks during read and instead records a version number, checking WHERE id = ? AND version = ? at update time. If modified, the transaction rolls back and retries, making it superior for read-heavy web apps with low write collision."
+      }
+    ]
+  },
+  {
+    "role": "Full-Stack Developer",
+    "difficulty": "medium",
+    "category": "technical",
+    "questions": [
+      {
+        "id": "fs-01",
+        "questionText": "Walk through the architectural trade-offs between Server-Side Rendering (SSR), Static Site Generation (SSG), and Client-Side Rendering (CSR).",
+        "topicTag": "Web Architecture",
+        "difficulty": "medium",
+        "expectedConcepts": [
+          "CSR: fast subsequent transitions, heavy initial bundle, blank screen without JS",
+          "SSG: optimal TTFB and CDN caching, build time scales with page count, stale data risk",
+          "SSR: real-time dynamic data, SEO friendly, higher server compute and TTFB overhead",
+          "Streaming SSR / Incremental Static Regeneration (ISR) as hybrid solutions"
+        ],
+        "exampleAnswer": "CSR loads an empty shell and renders client-side, giving snappy interactions after loading but poor initial paint and SEO vulnerabilities. SSG pre-renders HTML at build time for instant CDN delivery and zero server compute, but build times grow with catalog size and content updates require revalidation. SSR renders per-request on the server, ensuring real-time authenticated data and great SEO at the expense of server load and slightly higher TTFB. Modern systems use hybrid approaches like ISR or streaming SSR."
+      },
+      {
+        "id": "fs-02",
+        "questionText": "How do you protect a modern full-stack web application against CSRF, XSS, and SQL Injection attacks?",
+        "topicTag": "Full-Stack Security",
+        "difficulty": "hard",
+        "expectedConcepts": [
+          "XSS: contextual output encoding, CSP headers, avoiding innerHTML, React automatic escaping",
+          "CSRF: SameSite=Strict cookies, anti-CSRF tokens, Authorization Bearer headers",
+          "SQL Injection: parameterized prepared statements, ORM parameterization, never string concatenating input",
+          "Input validation schemas (Zod/Joi) and sanitize headers"
+        ],
+        "exampleAnswer": "To stop SQL injection, always use parameterized queries or prepared statements so database drivers treat user inputs strictly as literals. To prevent XSS, sanitize and validate inputs on the server, avoid raw HTML rendering (dangerouslySetInnerHTML), and enforce a strict Content Security Policy. To defend against CSRF, use SameSite cookies, anti-CSRF request tokens, or transmit authentication credentials via custom Authorization headers which browser cross-origin forms cannot trigger automatically."
+      },
+      {
+        "id": "fs-03",
+        "questionText": "How would you design an end-to-end file upload feature handling 50MB user resumes with progress tracking, validation, and security?",
+        "topicTag": "Full-Stack System Design",
+        "difficulty": "medium",
+        "expectedConcepts": [
+          "Presigned S3/GCS upload URLs or streamed multipart uploads",
+          "MIME magic byte verification (not trusting file extension)",
+          "File size limits in reverse proxy and backend",
+          "Asynchronous parsing queue for OCR or text extraction",
+          "Private bucket storage with signed download URLs"
+        ],
+        "exampleAnswer": "For large files, the client requests a pre-signed direct-upload URL from the backend with strict metadata constraints (Content-Length, Content-Type). The client streams directly to cloud storage (S3/GCS) with XMLHttpRequest or axios for progress tracking. Upon upload completion, a backend webhook or serverless event validates magic byte headers to confirm genuine PDF format, strips metadata, runs antivirus scanning, and dispatches background parsing tasks. The file is stored in a private bucket with short-lived access URLs."
+      }
+    ]
+  },
+  {
+    "role": "Python Developer",
+    "difficulty": "medium",
+    "category": "technical",
+    "questions": [
+      {
+        "id": "py-01",
+        "questionText": "Explain the Global Interpreter Lock (GIL) in CPython. How do multithreading, multiprocessing, and asyncio compare for concurrency?",
+        "topicTag": "CPython Internals & Concurrency",
+        "difficulty": "medium",
+        "expectedConcepts": [
+          "GIL ensures thread-safety of CPython memory management by allowing only one native thread to execute bytecode at a time",
+          "Multithreading effective for I/O bound tasks where threads release GIL while waiting",
+          "Multiprocessing bypasses GIL by creating separate processes with separate memory spaces",
+          "Asyncio provides cooperative single-threaded event loop for high-throughput non-blocking I/O"
+        ],
+        "exampleAnswer": "The GIL is a mutex protecting CPython memory management and reference counts from concurrent corruption, meaning only one native thread executes Python bytecode at any moment. For I/O-bound tasks, multithreading works well because threads release the GIL during network or disk I/O. For CPU-bound tasks, multiprocessing is required to leverage multiple CPU cores across independent process memories. Asyncio is a single-threaded cooperative multitasking model ideal for thousands of simultaneous I/O connections."
+      },
+      {
+        "id": "py-02",
+        "questionText": "What are Python generators and itertools? How do they improve memory efficiency when processing large streaming datasets?",
+        "topicTag": "Memory Management & Iterators",
+        "difficulty": "easy",
+        "expectedConcepts": [
+          "Generators use yield to produce values lazily on demand",
+          "Iterator protocol (__iter__ and __next__)",
+          "O(1) memory footprint regardless of stream size",
+          "itertools functions (islice, chain, groupby) for composition without list materialization"
+        ],
+        "exampleAnswer": "Generators are functions that yield values one at a time on demand rather than allocating an entire collection in memory at once. Because they adhere to the iterator protocol, they have an O(1) memory footprint whether processing 10 items or 10 billion items. Combined with itertools like islice or chain, you can filter, batch, and transform massive streams without memory spikes."
+      }
+    ]
+  },
+  {
+    "role": "Data Analyst",
+    "difficulty": "medium",
+    "category": "technical",
+    "questions": [
+      {
+        "id": "da-01",
+        "questionText": "Explain the difference between ROW_NUMBER(), RANK(), and DENSE_RANK() window functions in SQL, with a concrete example.",
+        "topicTag": "Advanced SQL Analytics",
+        "difficulty": "medium",
+        "expectedConcepts": [
+          "ROW_NUMBER assigns unique sequential integers regardless of ties",
+          "RANK assigns same rank to ties and skips subsequent numbers",
+          "DENSE_RANK assigns same rank to ties without skipping numbers",
+          "PARTITION BY and ORDER BY clause mechanics"
+        ],
+        "exampleAnswer": "When ranking values with identical numbers (e.g. scores 100, 90, 90, 80): ROW_NUMBER() arbitrarily outputs 1, 2, 3, 4 without duplicates. RANK() outputs 1, 2, 2, 4 (skipping rank 3 due to the tie). DENSE_RANK() outputs 1, 2, 2, 3 (no gaps in sequence). DENSE_RANK is preferred when you need top-N distinct score groups."
+      },
+      {
+        "id": "da-02",
+        "questionText": "How do you detect, handle, and report data leakage in predictive modeling pipelines?",
+        "topicTag": "Data Integrity & Pipeline Design",
+        "difficulty": "hard",
+        "expectedConcepts": [
+          "Definition: Training features containing information from the target variable or future timeframes",
+          "Train/test split before applying imputations, scalers, or aggregations",
+          "Time-series walk-forward validation instead of random shuffling",
+          "Cross-validation inside Pipeline objects"
+        ],
+        "exampleAnswer": "Data leakage happens when information from outside the training dataset (or future information relative to prediction time) contaminates model features. Examples include fitting a StandardScaler or imputer on the full dataset before splitting. To prevent leakage, always split train/validation sets first, encapsulate preprocessing inside pipeline objects fit strictly on train sets, and use temporal walk-forward splits for time-series data."
+      }
+    ]
+  },
+  {
+    "role": "Machine Learning Engineer",
+    "difficulty": "hard",
+    "category": "technical",
+    "questions": [
+      {
+        "id": "mle-01",
+        "questionText": "Explain the trade-offs between LoRA (Low-Rank Adaptation) and full parameter fine-tuning for Large Language Models.",
+        "topicTag": "LLM Optimization",
+        "difficulty": "hard",
+        "expectedConcepts": [
+          "Full fine-tuning updates all weights, requiring enormous GPU VRAM for optimizer states (AdamW)",
+          "LoRA decomposes weight update delta W into low-rank matrices A and B (rank r << d)",
+          "Drastic reduction in trainable parameters (often <1%) and VRAM usage",
+          "Ability to serve multiple task-specific LoRA adapters with a single shared base model",
+          "Quantized LoRA (QLoRA) enabling 4-bit base model fine-tuning"
+        ],
+        "exampleAnswer": "Full fine-tuning updates all model weights, delivering maximum capability adjustments but demanding massive GPU VRAM to store optimizer states (e.g. 16-24 bytes per parameter with AdamW) and producing a full model checkpoint for every task. LoRA freezes base weights and decomposes the weight delta into low-rank matrices W = W0 + B*A with rank r. This slashes trainable parameters by 99%+, lowers memory footprint drastically, prevents catastrophic forgetting, and allows dynamically swapping lightweight adapters on a single hosted base model."
+      },
+      {
+        "id": "mle-02",
+        "questionText": "How do you detect and mitigate training instability like vanishing or exploding gradients in deep networks?",
+        "topicTag": "Deep Learning Fundamentals",
+        "difficulty": "medium",
+        "expectedConcepts": [
+          "Gradient clipping (by value or norm)",
+          "Proper weight initialization (He/Kaiming, Xavier/Glorot)",
+          "Normalization layers (LayerNorm, BatchNorm, RMSNorm)",
+          "Residual/skip connections",
+          "Learning rate warm-up and schedulers"
+        ],
+        "exampleAnswer": "Exploding gradients produce NaN losses, while vanishing gradients cause training to stall in deep layers. Mitigation strategies include gradient norm clipping, employing modern activation functions like GeLU/Swish instead of saturated sigmoids, using proper initialization schemes, adding residual skip connections, using normalization techniques (LayerNorm, RMSNorm), and applying learning rate warmup schedules."
+      }
+    ]
+  },
+  {
+    "role": "AI/ML Engineer",
+    "difficulty": "hard",
+    "category": "technical",
+    "questions": [
+      {
+        "id": "aiml-01",
+        "questionText": "How would you design a production RAG (Retrieval-Augmented Generation) system to minimize hallucinations and manage retrieval latency?",
+        "topicTag": "RAG Systems & Vector Search",
+        "difficulty": "hard",
+        "expectedConcepts": [
+          "Chunking strategy (semantic chunking, parent-child document retrieval)",
+          "Hybrid search: combining dense vector retrieval with sparse BM25/keyword search",
+          "Re-ranking stage (Cross-Encoder / Cohere Rerank)",
+          "Grounding prompts and citation extraction",
+          "Evaluation metrics: context relevance, faithfulness, answer correctness (RAGAS framework)"
+        ],
+        "exampleAnswer": "In production RAG, first use semantic or window chunking with metadata preservation. Combine dense vector embeddings with sparse keyword search (BM25) via Reciprocal Rank Fusion to catch exact keywords and conceptual semantics. Feed top candidates to a cross-encoder re-ranker to pick the most relevant chunks within context limits. Enforce grounding with system prompts instructing the model to cite sources and decline when ungrounded. Track faithfulness and context recall continuously using evaluation frameworks like RAGAS."
+      },
+      {
+        "id": "aiml-02",
+        "questionText": "Explain the difference between FlashAttention and standard multi-head self-attention, and why memory access (IO) is the main bottleneck.",
+        "topicTag": "Transformer Architecture & CUDA",
+        "difficulty": "hard",
+        "expectedConcepts": [
+          "Standard attention materializes N x N attention matrix in High Bandwidth Memory (HBM)",
+          "Memory bandwidth bound rather than compute bound",
+          "FlashAttention uses tiling to compute softmax incrementally in fast SRAM",
+          "Eliminates storing full N x N matrix in HBM, reducing memory complexity from O(N^2) to O(N)",
+          "Enables longer context lengths and 2-4x wall-clock speedup"
+        ],
+        "exampleAnswer": "Standard self-attention computes Q*K^T, writes the entire N x N score matrix to GPU High Bandwidth Memory (HBM), applies softmax, and reads it back to multiply by V. This makes attention memory-bound (IO-bound) rather than compute-bound. FlashAttention tiles the inputs into smaller blocks that fit directly inside fast on-chip SRAM, computing online softmax incrementally without ever writing the massive intermediate N x N attention matrix to slow HBM. This turns quadratic memory IO into linear IO, delivering substantial speedups."
+      }
+    ]
+  },
+  {
+    "role": "SQL Developer",
+    "difficulty": "medium",
+    "category": "technical",
+    "questions": [
+      {
+        "id": "sql-01",
+        "questionText": "Explain the mechanics of B-Tree indexes versus Hash indexes in MySQL InnoDB. What is a covering index and how does it prevent index lookups?",
+        "topicTag": "Indexing & Query Optimization",
+        "difficulty": "medium",
+        "expectedConcepts": [
+          "B-Tree supports range queries, sorting, prefix searches, ordered keys",
+          "Hash index supports O(1) exact equality matches only",
+          "InnoDB primary key is clustered index storing row data at leaf nodes",
+          "Secondary index stores indexed columns plus primary key",
+          "Covering index includes all columns requested by the SELECT query, avoiding secondary lookup to clustered index"
+        ],
+        "exampleAnswer": "InnoDB uses B+Tree structures where leaf nodes store sorted keys and pointers. Clustered indexes store the full row data on primary key leaves, whereas secondary indexes store the indexed columns and the primary key. If a query requires columns not in the secondary index, InnoDB must perform a bookmark lookup on the clustered index. A covering index contains all columns referenced in SELECT, WHERE, and JOIN clauses, satisfying the query entirely from the index leaf without touching table rows."
+      },
+      {
+        "id": "sql-02",
+        "questionText": "How would you diagnose and fix a slow query in MySQL using EXPLAIN ANALYZE? What key metrics indicate a full table scan or filesort?",
+        "topicTag": "Query Profiling & Execution Plans",
+        "difficulty": "medium",
+        "expectedConcepts": [
+          "EXPLAIN ANALYZE provides actual execution time and iterator tree",
+          "type = ALL indicates full table scan",
+          "Using filesort indicates in-memory or disk sort without matching index order",
+          "Using temporary indicates temporary table creation",
+          "Remediation: composite indexing matching WHERE, JOIN, and ORDER BY order"
+        ],
+        "exampleAnswer": "Run EXPLAIN ANALYZE to observe the actual execution tree and iterator timings. Look for 'type: ALL' (full table scan) on large tables, high row counts, 'Using temporary' (disk or memory temp table), and 'Using filesort' (sorting without index order). To fix this, create a composite index ordering columns by: equality filters first, range filters second, and matching the ORDER BY clause."
+      }
+    ]
+  }
+]
